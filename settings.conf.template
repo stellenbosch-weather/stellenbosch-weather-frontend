@@ -1,0 +1,8 @@
+[database]
+host = localhost
+username = weather
+password = REDACTED
+database = weather
+
+[sonbesie]
+address = ip.add.re.ss
