@@ -40,7 +40,6 @@ $sunAng = number_format($SunAng, 5, '.', '\'');
 
 if ($nowTime > $sunset or $nowTime < $sunrise) {
   $isNight=1;
-  $icon[0] = "nt_".$icon[0];
 }
 else
 {
