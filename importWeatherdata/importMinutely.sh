@@ -1,5 +1,7 @@
 #!/bin/bash
 #schedule this file for minutely execution by cron
 
+setenv SCRIPTDIR `dirname $0`
+
 # Sonbesie
-$cwd/sonbesie/TMinHTML.py
+$SCRIPTDIR/sonbesie/TMinHTML.py
