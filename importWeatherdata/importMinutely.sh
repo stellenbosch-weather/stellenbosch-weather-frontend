@@ -4,4 +4,4 @@
 cd -P -- "$(dirname -- "$0")"
 
 # Sonbesie
-$SCRIPTDIR/sonbesie/TMinHTML.py
+./sonbesie/TMinHTML.py
