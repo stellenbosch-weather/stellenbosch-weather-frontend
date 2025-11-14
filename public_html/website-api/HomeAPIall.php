@@ -648,8 +648,6 @@ $updateTimeString = $updateDate." at ".$updateTime.' from '.
 #  $workingWeatherStationCount.' weather stations</a>.';
 
 if ($errorString != "") $errorString = "<small>".$errorString."(".($longActive-$nowActive)." of ".$longActive." weather stations offline)</small>";
-#include forecasts after error string hadling above
-include("HomeAPIforecasts.php");
 
 include("HomeAPIsunmoon.php");
 
