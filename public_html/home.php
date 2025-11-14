@@ -11,9 +11,9 @@ include("website-api/HomeAPIall.php"); #Die API vir die homepage.
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<meta content="JP Meijers" name="author" /> 
-<meta http-equiv="Refresh" content="3600; url=http://weather.sun.ac.za/home.php" /> 
-<title>Stellenbosch Weather - Home</title> 
+<meta content="JP Meijers" name="author" />
+<meta http-equiv="Refresh" content="3600; url=http://weather.sun.ac.za/home.php" />
+<title>Stellenbosch Weather - Home</title>
 
 <!-- popup box -->
 <script src="sources/jquery.js" type="text/javascript"></script>
@@ -36,14 +36,14 @@ function splitReplaceWeer(data) {
 	document.getElementById('minTemp').innerHTML = apart[6];
 	document.getElementById('maxTemp').innerHTML = apart[7];
 	document.getElementById('update').innerHTML = apart[8];
-	
+
 	var currentTime = new Date()
   var hours = currentTime.getHours()
   var minutes = currentTime.getMinutes()
 
   if (minutes < 10)
   minutes = "0" + minutes
-	
+
 	document.getElementById('gentime').innerHTML = "Page refreshed in "+apart[9]+" seconds @ "+hours+":"+minutes;
 }
 
@@ -109,8 +109,8 @@ a:active {
 </head>
 
 <body>
-<?php 
-if (isset($errorString) and $errorString!="") 
+<?php
+if (isset($errorString) and $errorString!="")
 {
   echo '<small><span id="error">'.$errorString.'</span></small><br />';
 }
@@ -137,7 +137,7 @@ if (isset($errorString) and $errorString!="")
               <a href="http://weather.sun.ac.za/graphs/barometer" target="mainFrame" title="Click for graphs.">
                 <span id="barometer"><?php echo $baroString; ?></span></a><br />
             <strong>Trend: </strong><?php
-            echo "<small><span id=\"trend\" title=\"According to the Sager Weathercaster\""; 
+            echo "<small><span id=\"trend\" title=\"According to the Sager Weathercaster\"";
             if($quickforecast=="Forecast Unavailable") echo " style=\"color: gray\"";
             echo ">".$quickforecast;
             ?></span></small></div></td>
@@ -149,37 +149,15 @@ if (isset($errorString) and $errorString!="")
             <span class="style7">Min: <span id="minTemp"><?php echo $minTemperString; ?></span></span><br />
             <span class="style8">Max: <span id="maxTemp"><?php echo $maxTemperString; ?></span></span>
 	</div></a></td>
-        <th width="33%" bgcolor="#DEEFFF">
-	<table width="100%" border="0" cellspacing="2" cellpadding="3">
+    <th width="33%" bgcolor="#DEEFFF">
+	    <table width="100%" border="0" cellspacing="2" cellpadding="3">
           <tr>
             <td scope="col">
-		<div align="left">
-		    <strong><?php if(!isset($error)) echo DateTime::createFromFormat(DateTime::ISO8601, $forecastDate[0])->format('l j F Y'); ?></strong><br />
-                    Max: <?php echo $predMaxTemp[0]; ?>&deg;C, Min: <?php echo $predMinTemp[0]; ?>&deg;C<br />
-                    <?php echo $conditions[0]; ?> 
-		</div>
+        		<a href="forecast-table.php">Click here for forecast table.</a>
             </td>
-            <th scope="col">
-		<div align="center">
-		    <img src="sources/images/set1/<?php echo $icon[0];/*Today's icon*/?>.gif" alt="<?php echo $icon[0];?>" title="<?php echo $icon[0];?>" width="50" height="50" />
-		</div>
-            </th>
-          </tr>
-          <tr>
-            <td scope="row">
-		<div align="left">
-		    <strong><?php if(!isset($error)) echo DateTime::createFromFormat(DateTime::ISO8601, $forecastDate[1])->format('l j F Y'); ?></strong><br />
-                    Max: <?php echo $predMaxTemp[1]; ?>&deg;C, Min: <?php echo $predMinTemp[1]; ?>&deg;C<br />
-                    <?php echo $conditions[1]; ?>
-		</div>
-	    </td>
-            <th>
-		<div align="center">
-                    <img src="sources/images/set1/<?php echo $icon[1];/*Tomorrow's icon*/?>.gif" alt="<?php echo $icon[1];?>" title="<?php echo $icon[1];?>" width="50" height="50" />
-		</div>
-	    </th>
           </tr>
         </table>
+
       </th>
       </tr>
       <tr bgcolor="#426ECF">
@@ -195,7 +173,7 @@ if (isset($errorString) and $errorString!="")
     <div align="left">
     <?php if(!isset($error)){
       // echo 'Last Update:'. $forecastUpdateTime/*Time*/.' from <a href="http://www.wunderground.com/" target="_blank">Wunderground.com</a>';
-      echo 'Forecast by weather.com';
+      echo 'Forecast by met.no';
     }
     ?>
         
