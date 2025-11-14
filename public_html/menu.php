@@ -67,7 +67,7 @@ a:active {
     <td><span class="style1"><a href="http://weather.sun.ac.za/current.php" target="mainFrame">Current Weather</a> </span></td>
   </tr>-->
   <tr bgcolor="#DEEFFF">
-    <td><span class="style1"><a href="http://weather.sun.ac.za/forecasts.php" target="mainFrame">Forecasts</a></span></td>
+    <td><span class="style1"><a href="http://weather.sun.ac.za/forecast-table.php" target="mainFrame">Forecasts</a></span></td>
   </tr>
   <tr bgcolor="#DEEFFF">
     <td>
