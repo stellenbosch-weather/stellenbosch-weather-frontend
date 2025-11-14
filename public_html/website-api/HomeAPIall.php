@@ -2,7 +2,7 @@
 include_once ("sources/maan.php");
 # Laat moon.php sy werk doen. Dit moet heel bo aan die script gedoen word.
 list($MoonPhase, $MoonAge, $MoonDist, $MoonAng, $SunDist, $SunAng, $mpfrac) = (new Moon)->phase(date("Y"), date("m"), date("d"), date("G"), date("i"), date("s"));
-//ini_set(precision, "14"); # Maak weer floats reg sodat round() weer werk.
+ini_set(precision, "14"); # Maak weer floats reg sodat round() weer werk.
 
 #include_once ("/home/weather/public_html/forecasting/bt-sager-wc.php");
 
