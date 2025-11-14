@@ -156,12 +156,12 @@ Select the data you wish to download, fill in your details and click on "Downloa
     <tr><td>
     Start date: 
     </td><td>
-    <input type="text" id="startdatepicker" name="startdate"><br>
+    <input type="date" id="startdatepicker" name="startdate"><br>
     </td></tr>
     <tr><td>
     End date: 
     </td><td>
-    <input type="text" id="enddatepicker" name="enddate"><br>
+    <input type="date" id="enddatepicker" name="enddate"><br>
     </td></tr>
     </table>
     <br>
