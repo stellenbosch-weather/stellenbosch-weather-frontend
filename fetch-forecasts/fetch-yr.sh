@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Coordinates: 34° S, 19° E
-LAT="-34.0"
-LON="19.0"
+# Coordinates: -33.92867437486572, 18.865371933386907
+LAT="-33.92867"
+LON="18.86537"
 
 API_URL="https://api.met.no/weatherapi/locationforecast/2.0/complete"
 
