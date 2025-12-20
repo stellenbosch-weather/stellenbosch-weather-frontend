@@ -1,0 +1,260 @@
+const apiBaseUrl = 'http://weather.sun.ac.za/api/';
+
+const alertPlaceholder = document.getElementById('liveAlertPlaceholder');
+const forecastsContainer = document.getElementById('forecastsContainer');
+
+// Load Chart.js library dynamically
+const chartScript = document.createElement('script');
+chartScript.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+document.head.appendChild(chartScript);
+
+async function refresh() {
+    try {
+        const response = await fetch(apiBaseUrl + 'forecast/');
+        const data = await response.json();
+        console.log(data);
+
+        clearAlertMessage();
+
+        if (data.error) {
+            console.log('Error from server:', data.error);
+            setAlertMessage('Error fetching forecast data', 'warning')
+        } else {
+            updateForecast(data);
+        }
+
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        setAlertMessage('Error fetching forecast data', 'warning')
+    }
+}
+
+function clearAlertMessage() {
+    alertPlaceholder.innerHTML = '';
+}
+
+function setAlertMessage(message, type) {
+    const wrapper = document.createElement('div')
+    wrapper.innerHTML = [
+        `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+        `   <div>${message}</div>`,
+        '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+        '</div>'
+    ].join('')
+
+    alertPlaceholder.innerHTML = '';
+    alertPlaceholder.append(wrapper)
+}
+
+function updateForecast(data) {
+    if (!data.properties || !data.properties.timeseries) {
+        setAlertMessage('Invalid forecast data format', 'warning');
+        return;
+    }
+
+    const timeseries = data.properties.timeseries.slice(0, 48); // Next 48 hours
+
+    // Clear container
+    forecastsContainer.innerHTML = '';
+
+    // Create main container
+    const mainDiv = document.createElement('div');
+    mainDiv.style.cssText = 'padding: 20px; max-width: 1200px; margin: 0 auto;';
+
+    // Add title
+    const title = document.createElement('h2');
+    title.textContent = 'Weather Forecast';
+    title.style.cssText = 'color: #333; margin-bottom: 20px;';
+    mainDiv.appendChild(title);
+
+    // Create temperature chart section
+    const chartSection = document.createElement('div');
+    chartSection.style.cssText = 'background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;';
+
+    const chartTitle = document.createElement('h3');
+    chartTitle.textContent = 'Temperature Trend';
+    chartTitle.style.cssText = 'color: #555; margin-bottom: 15px;';
+    chartSection.appendChild(chartTitle);
+
+    const canvas = document.createElement('canvas');
+    canvas.id = 'tempChart';
+    canvas.style.cssText = 'max-height: 300px;';
+    chartSection.appendChild(canvas);
+    mainDiv.appendChild(chartSection);
+
+    // Create hourly forecast cards
+    const cardsSection = document.createElement('div');
+    cardsSection.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;';
+
+    timeseries.slice(0, 12).forEach(entry => {
+        const card = document.createElement('div');
+        card.style.cssText = 'background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center;';
+
+        const time = document.createElement('div');
+        time.textContent = formatTime(entry.time);
+        time.style.cssText = 'font-weight: bold; color: #555; margin-bottom: 10px;';
+        card.appendChild(time);
+
+        const icon = document.createElement('div');
+        icon.textContent = getWeatherIcon(entry.data.next_1_hours?.summary?.symbol_code || entry.data.next_6_hours?.summary?.symbol_code);
+        icon.style.cssText = 'font-size: 40px; margin-bottom: 10px;';
+        card.appendChild(icon);
+
+        const temp = document.createElement('div');
+        temp.textContent = `${entry.data.instant.details.air_temperature}°C`;
+        temp.style.cssText = 'font-size: 24px; font-weight: bold; color: #333;';
+        card.appendChild(temp);
+
+        const precip = document.createElement('div');
+        const precipAmount = entry.data.next_1_hours?.details?.precipitation_amount || 0;
+        precip.textContent = `💧 ${precipAmount} mm`;
+        precip.style.cssText = 'font-size: 12px; color: #666; margin-top: 5px;';
+        card.appendChild(precip);
+
+        const wind = document.createElement('div');
+        wind.textContent = `💨 ${entry.data.instant.details.wind_speed} m/s`;
+        wind.style.cssText = 'font-size: 12px; color: #666;';
+        card.appendChild(wind);
+
+        cardsSection.appendChild(card);
+    });
+    mainDiv.appendChild(cardsSection);
+
+    // Create detailed table
+    const tableSection = document.createElement('div');
+    tableSection.style.cssText = 'background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow-x: auto;';
+
+    const tableTitle = document.createElement('h3');
+    tableTitle.textContent = 'Detailed Forecast';
+    tableTitle.style.cssText = 'color: #555; margin-bottom: 15px;';
+    tableSection.appendChild(tableTitle);
+
+    const table = document.createElement('table');
+    table.style.cssText = 'width: 100%; border-collapse: collapse;';
+
+    const thead = document.createElement('thead');
+    thead.innerHTML = `
+        <tr style="background: #f5f5f5;">
+            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Time</th>
+            <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd;">Temp (°C)</th>
+            <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd;">Precipitation (mm)</th>
+            <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd;">Wind (m/s)</th>
+            <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd;">Humidity (%)</th>
+            <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd;">Pressure (hPa)</th>
+        </tr>
+    `;
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    timeseries.slice(0, 24).forEach((entry, index) => {
+        const row = document.createElement('tr');
+        row.style.cssText = index % 2 === 0 ? 'background: #fafafa;' : '';
+
+        const details = entry.data.instant.details;
+        const precipAmount = entry.data.next_1_hours?.details?.precipitation_amount || 0;
+
+        row.innerHTML = `
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">${formatTime(entry.time)}</td>
+            <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">${details.air_temperature}</td>
+            <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">${precipAmount}</td>
+            <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">${details.wind_speed}</td>
+            <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">${details.relative_humidity}</td>
+            <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">${details.air_pressure_at_sea_level}</td>
+        `;
+        tbody.appendChild(row);
+    });
+    table.appendChild(tbody);
+    tableSection.appendChild(table);
+    mainDiv.appendChild(tableSection);
+
+    forecastsContainer.appendChild(mainDiv);
+
+    // Render chart after DOM update
+    setTimeout(() => createTemperatureChart(timeseries), 100);
+}
+
+function createTemperatureChart(timeseries) {
+    const ctx = document.getElementById('tempChart');
+    if (!ctx || typeof Chart === 'undefined') return;
+
+    const labels = timeseries.map(entry => formatTime(entry.time));
+    const temperatures = timeseries.map(entry => entry.data.instant.details.air_temperature);
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Temperature (°C)',
+                data: temperatures,
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    title: {
+                        display: true,
+                        text: 'Temperature (°C)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                }
+            }
+        }
+    });
+}
+
+function formatTime(isoString) {
+    const date = new Date(isoString);
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    return `${day}/${month} ${hours}:${minutes}`;
+}
+
+function getWeatherIcon(symbolCode) {
+    if (!symbolCode) return '❓';
+
+    const iconMap = {
+        'clearsky': '☀️',
+        'fair': '🌤️',
+        'partlycloudy': '⛅',
+        'cloudy': '☁️',
+        'rain': '🌧️',
+        'lightrain': '🌦️',
+        'heavyrain': '⛈️',
+        'snow': '❄️',
+        'sleet': '🌨️',
+        'fog': '🌫️',
+        'thunder': '⚡'
+    };
+
+    for (const [key, icon] of Object.entries(iconMap)) {
+        if (symbolCode.includes(key)) return icon;
+    }
+
+    return '🌡️';
+}
+
+
+// Top level functions, aka entry point
+window.onload = refresh;
+window.setInterval(refresh, 60000);
