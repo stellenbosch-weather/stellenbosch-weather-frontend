@@ -3,11 +3,6 @@ const apiBaseUrl = 'http://weather.sun.ac.za/api/';
 const alertPlaceholder = document.getElementById('liveAlertPlaceholder');
 const forecastsContainer = document.getElementById('forecastsContainer');
 
-// Load Chart.js library dynamically
-const chartScript = document.createElement('script');
-chartScript.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
-document.head.appendChild(chartScript);
-
 async function refresh() {
     try {
         const response = await fetch(apiBaseUrl + 'forecast/');
@@ -180,6 +175,49 @@ function createTemperatureChart(timeseries) {
     const labels = timeseries.map(entry => formatTime(entry.time));
     const temperatures = timeseries.map(entry => entry.data.instant.details.air_temperature);
 
+    // Calculate night regions for annotation
+    const lat = -33.9326; // Stellenbosch
+    const lng = 18.8644;
+    const annotations = [];
+
+    // Identify day/night transitions in the timeseries
+    timeseries.forEach((entry, index) => {
+        if (index === timeseries.length - 1) return;
+
+        const date = new Date(entry.time);
+        const sunTimes = SunCalc.getTimes(date, lat, lng);
+        
+        // Is this specific hour "night"?
+        const isNight = date < sunTimes.sunrise || date > sunTimes.sunset;
+        
+        if (isNight) {
+            // Determine if this is the start of a night block to show the label
+            const isStartOfBlock = index === 0 || (function() {
+                const prevDate = new Date(timeseries[index-1].time);
+                const prevSun = SunCalc.getTimes(prevDate, lat, lng);
+                return !(prevDate < prevSun.sunrise || prevDate > prevSun.sunset);
+            })();
+
+            annotations.push({
+                type: 'box',
+                xMin: index - 0.5,
+                xMax: index + 0.5,
+                backgroundColor: 'rgba(0, 0, 50, 0.07)',
+                borderWidth: 0,
+                drawTime: 'beforeDatasetsDraw',
+                label: {
+                    display: isStartOfBlock,
+                    content: 'Night',
+                    color: 'rgba(0, 0, 0, 0.3)',
+                    font: {
+                        size: 10
+                    },
+                    position: 'start' // Simplified position for Chart.js 4.x boxes
+                }
+            });
+        }
+    });
+
     new Chart(ctx, {
         type: 'line',
         data: {
@@ -200,6 +238,9 @@ function createTemperatureChart(timeseries) {
                 legend: {
                     display: true,
                     position: 'top'
+                },
+                annotation: {
+                    annotations: annotations
                 }
             },
             scales: {
@@ -257,4 +298,4 @@ function getWeatherIcon(symbolCode) {
 
 // Top level functions, aka entry point
 window.onload = refresh;
-window.setInterval(refresh, 60000);
+// window.setInterval(refresh, 60000);
