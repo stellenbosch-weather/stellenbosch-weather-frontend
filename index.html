@@ -85,7 +85,7 @@ background-position: center top; background-image: url('/assets/jonkershoek-moun
                     Outdoor Temperature
                 </div>
                 <div class="card-body text-center d-flex flex-column justify-content-center"
-                     id="cardTemperatureBody">
+                     id="cardTemperatureBody" style="cursor: pointer;">
                     <div class="display-1" id="outdoorTemperature">
                         <span class="text-muted">---</span>
                     </div>
@@ -207,6 +207,20 @@ background-position: center top; background-image: url('/assets/jonkershoek-moun
 
 
     <!-- Modal popup definition -->
+    <div class="modal fade" id="chartModal" tabindex="-1" aria-labelledby="chartModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="chartModalLabel">Temperature History (Past 24h)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <canvas id="tempChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-fullscreen modal-dialog-centered">
             <div class="modal-content">
@@ -233,6 +247,10 @@ background-position: center top; background-image: url('/assets/jonkershoek-moun
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="/libraries/jquery.timeago.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
 
 <script src="/libraries/suncalc.min.js"></script>
 

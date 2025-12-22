@@ -6,7 +6,9 @@
 const apiBaseUrl = 'http://weather.sun.ac.za/api/';
 
 const imageModal = document.getElementById('imageModal');
+const chartModal = new bootstrap.Modal(document.getElementById('chartModal'));
 const alertPlaceholder = document.getElementById('liveAlertPlaceholder');
+
 const cardCurrentBody = document.getElementById('cardCurrentBody');
 const outdoorTemperature = document.getElementById('outdoorTemperature');
 const outdoorTemperatureFooter = document.getElementById('outdoorTemperatureFooter');
@@ -19,6 +21,8 @@ const sunStats = document.getElementById('sunStats');
 const earthImageContainer = document.getElementById('earthImageContainer');
 
 const cardStarsBody = document.getElementById('cardStarsBody');
+
+let tempChartInstance = null;
 
 async function refreshOnLoad() {
     refreshMinutely().then();
@@ -420,6 +424,140 @@ function isNumeric(value) {
     return !isNaN(parseFloat(value)) && isFinite(value);
 }
 
+function createTemperatureChart(historyData) {
+    const ctx = document.getElementById('tempChart');
+    if (!ctx || typeof Chart === 'undefined') return;
+
+    // Destroy previous instance if it exists to avoid scale errors
+    if (tempChartInstance) {
+        tempChartInstance.destroy();
+    }
+
+    // Map data and filter out nulls or invalid timestamps
+    const chartData = historyData
+        .filter(entry => entry.AirTC_Avg !== null && entry.TimeStamp)
+        .map(entry => {
+            const date = new Date(entry.TimeStamp);
+            return isNaN(date.getTime()) ? null : { x: date, y: entry.AirTC_Avg };
+        })
+        .filter(entry => entry !== null);
+
+    if (chartData.length === 0) return;
+
+    // Calculate night regions for annotation
+    const lat = -33.9326; // Stellenbosch
+    const lng = 18.8644;
+    const annotations = [];
+
+    historyData.forEach((entry, index) => {
+        if (index === historyData.length - 1 || !entry.TimeStamp || !historyData[index+1].TimeStamp) return;
+
+        const date = new Date(entry.TimeStamp);
+        const sunTimes = SunCalc.getTimes(date, lat, lng);
+        const isNight = date < sunTimes.sunrise || date > sunTimes.sunset;
+
+        if (isNight) {
+            const isStartOfBlock = index === 0 || (function() {
+                const prevDate = new Date(historyData[index-1].TimeStamp);
+                const prevSun = SunCalc.getTimes(prevDate, lat, lng);
+                return !(prevDate < prevSun.sunrise || prevDate > prevSun.sunset);
+            })();
+
+            annotations.push({
+                type: 'box',
+                xMin: date,
+                xMax: new Date(historyData[index+1].TimeStamp),
+                backgroundColor: 'rgba(0, 0, 50, 0.07)',
+                borderWidth: 0,
+                drawTime: 'beforeDatasetsDraw',
+                label: {
+                    display: isStartOfBlock,
+                    content: '',
+                    color: 'rgba(0, 0, 0, 0.3)',
+                    font: { size: 10 },
+                    position: 'start'
+                }
+            });
+        }
+    });
+
+    tempChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Temperature (°C)',
+                data: chartData,
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { display: true, position: 'top' },
+                annotation: { annotations: annotations }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    title: { display: true, text: 'Temperature (°C)' }
+                },
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'hour',
+                        displayFormats: { hour: 'ddd DD/MM' },
+                        tooltipFormat: 'ddd DD/MM HH:mm'
+                    },
+                    ticks: {
+                        source: 'auto',
+                        callback: function(value) {
+                            const date = new Date(value);
+                            if (date.getHours() === 12) {
+                                return moment(date).format('ddd DD/MM');
+                            }
+                            return null;
+                        },
+                        autoSkip: false,
+                        maxRotation: 0
+                    },
+                    grid: {
+                        color: (context) => {
+                            if (context.tick && context.tick.value) {
+                                const date = new Date(context.tick.value);
+                                if (date.getHours() === 0) return 'rgba(0,0,0,0.15)';
+                            }
+                            return 'transparent';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+async function showTemperatureHistory() {
+    try {
+        const response = await fetch(apiBaseUrl + 'history/');
+        const data = await response.json();
+
+        if (Array.isArray(data) && data.length > 0) {
+            chartModal.show();
+            // We wait a bit for the modal to be visible so the chart can calculate its size
+            setTimeout(() => {
+                createTemperatureChart(data);
+            }, 200);
+        }
+    } catch (error) {
+        console.error('Error fetching history:', error);
+        setAlertMessage('Error fetching temperature history', 'danger');
+    }
+}
+
 
 // Top level functions, aka entry point
 window.onload = refreshOnLoad;
@@ -429,6 +567,20 @@ window.setInterval(refreshDaily, 86400000);
 
 jQuery(document).ready(function () {
     $("time.timeago").timeago();
+
+    if (outdoorTemperature) {
+        outdoorTemperature.addEventListener('click', showTemperatureHistory);
+    }
+
+    // Fix ARIA accessibility warning by removing focus from modal elements when closing
+    const chartModalElement = document.getElementById('chartModal');
+    if (chartModalElement) {
+        chartModalElement.addEventListener('hide.bs.modal', function () {
+            if (document.activeElement && chartModalElement.contains(document.activeElement)) {
+                document.activeElement.blur();
+            }
+        });
+    }
 });
 
 // Listen for modal open events and update content
