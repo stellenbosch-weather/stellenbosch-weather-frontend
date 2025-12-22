@@ -3,30 +3,33 @@ const apiBaseUrl = 'http://localhost:8081/';
 
 const alertPlaceholder = document.getElementById('liveAlertPlaceholder');
 
-function downloadFile(station) {
-    const checkbox = document.getElementById('acceptTermsYes');
-    const emailInput = document.getElementById('email');
-    let url = `${apiBaseUrl}download/?file=${station}`;
+    async function downloadFile(station) {
+        const checkbox = document.getElementById('acceptTermsYes');
+        const emailInput = document.getElementById('email');
+        const url = `${apiBaseUrl}download/`;
 
-    if (checkbox.checked) {
-        url += '&agree=yes';
-    }
+        const body = {
+            file: station,
+            agree: checkbox.checked ? 'yes' : 'no',
+            email: emailInput.value
+        };
 
-    if (emailInput.value) {
-        url += `&email=${encodeURIComponent(emailInput.value)}`;
-    }
-    
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
 
-    fetch(url)
-        .then(response => {
             if (!response.ok) {
-                return response.text().then(errorText => {
-                    throw new Error(errorText || `HTTP error! status: ${response.status}`);
-                });
+                const errorText = await response.text();
+                alertPlaceholder.innerHTML = `<div class="alert alert-danger" role="alert">Error downloading file: ${errorText || response.status}</div>`;
+                return;
             }
-            return response.blob();
-        })
-        .then(blob => {
+
+            const blob = await response.blob();
             const downloadUrl = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = downloadUrl;
@@ -35,13 +38,12 @@ function downloadFile(station) {
             a.click();
             window.URL.revokeObjectURL(downloadUrl);
             a.remove();
-        })
-        .catch(error => {
+        } catch (error) {
             alertPlaceholder.innerHTML = `<div class="alert alert-danger" role="alert">Error downloading file: ${error.message}</div>`;
-        });
-}
+        }
+    }
 
-function enableButtons() {
+    function enableButtons() {
     const checkbox = document.getElementById('acceptTermsYes');
     const emailInput = document.getElementById('email');
     const buttons = document.querySelectorAll('button[type="button"]');
