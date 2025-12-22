@@ -11,20 +11,38 @@ const cardCurrentBody = document.getElementById('cardCurrentBody');
 const outdoorTemperature = document.getElementById('outdoorTemperature');
 const outdoorTemperatureFooter = document.getElementById('outdoorTemperatureFooter');
 const cardForecastBody = document.getElementById('cardForecastBody');
-const moonImage = document.getElementById('moonImage');
+
 const moonStats = document.getElementById('moonStats');
+const moonImageContainer = document.getElementById('moonImageContainer');
+
 const sunStats = document.getElementById('sunStats');
+const earthImageContainer = document.getElementById('earthImageContainer');
+
 const cardStarsBody = document.getElementById('cardStarsBody');
 
-async function refresh() {
-    console.log('Refreshing weather data...');
-    clearAlertMessage();
+async function refreshOnLoad() {
+    refreshMinutely().then();
+    refreshHourly().then();
+    refreshDaily().then();
+}
 
+async function refreshMinutely() {
+    clearAlertMessage();
     await refreshCurrentWeather();
+}
+
+async function refreshHourly() {
+    clearAlertMessage();
     await refreshForecast();
     await refreshMoon();
     await refreshSun();
+    await refreshMoonImage();
+    await refreshEarthImage();
     await refreshStars();
+}
+
+async function refreshDaily() {
+    // clearAlertMessage();
 }
 
 async function refreshCurrentWeather() {
@@ -113,6 +131,36 @@ async function refreshMoon() {
     }
 }
 
+async function refreshMoonImage() {
+    try {
+        const response = await fetch(apiBaseUrl + 'moon/');
+
+        if (!response.ok) {
+            console.log('Error from server:', response.status);
+            setAlertMessage('Error fetching moon image data', 'warning');
+            moonImageContainer.innerHTML = '';
+        } else {
+            const blob = await response.blob();
+            const imageUrl = URL.createObjectURL(blob);
+
+            moonImageContainer.innerHTML = `
+                <a href="#"
+                   data-bs-toggle="modal" data-bs-target="#imageModal"
+                   data-img-url="${imageUrl}">
+                    <div class="m-2">
+                        <img src="${imageUrl}" alt="Moon" style="max-height: 150px;">
+                    </div>
+                </a>
+            `;
+        }
+
+    } catch (error) {
+        console.error('Error fetching moon image:', error);
+        setAlertMessage('Error fetching moon image data', 'warning');
+        moonImageContainer.innerHTML = '';
+    }
+}
+
 async function refreshSun() {
     try {
         const date = new Date();
@@ -129,6 +177,36 @@ async function refreshSun() {
 
     } catch (error) {
         sunStats.innerHTML = '<div class="text-muted">---</div>';
+    }
+}
+
+async function refreshEarthImage() {
+    try {
+        const response = await fetch(apiBaseUrl + 'earth/');
+
+        if (!response.ok) {
+            console.log('Error from server:', response.status);
+            setAlertMessage('Error fetching earth image data', 'warning');
+            earthImageContainer.innerHTML = '';
+        } else {
+            const blob = await response.blob();
+            const imageUrl = URL.createObjectURL(blob);
+
+            earthImageContainer.innerHTML = `
+                <a href="#"
+                   data-bs-toggle="modal" data-bs-target="#imageModal"
+                   data-img-url="${imageUrl}">
+                    <div class="m-2">
+                        <img src="${imageUrl}" alt="Earth" style="max-height: 150px;">
+                    </div>
+                </a>
+            `;
+        }
+
+    } catch (error) {
+        console.error('Error fetching earth image:', error);
+        setAlertMessage('Error fetching earth image data', 'warning');
+        earthImageContainer.innerHTML = '';
     }
 }
 
@@ -344,8 +422,10 @@ function isNumeric(value) {
 
 
 // Top level functions, aka entry point
-window.onload = refresh;
-window.setInterval(refresh, 60000);
+window.onload = refreshOnLoad;
+window.setInterval(refreshMinutely, 60000);
+window.setInterval(refreshHourly, 3600000);
+window.setInterval(refreshDaily, 86400000);
 
 jQuery(document).ready(function () {
     $("time.timeago").timeago();
