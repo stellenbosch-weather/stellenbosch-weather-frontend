@@ -84,9 +84,17 @@ background-position: center top; background-image: url('/assets/jonkershoek-moun
 <!--</div>-->
 
 <div class="container">
-    <div class="row">
+    <div class="row mt-4 mb-4">
         <div class="col">
             <h1>About</h1>
+
+            <p>
+                This website depends on weather stations that are maintained by third parties.
+                The current main weather station is called the Sonbesie, which is owned by the
+                Mechanical and Mechatronic Engineering department of the Stellenbosch University.
+                Details on this and other weather stations can be found below.
+            </p>
+
 
             <ul>
                 <li>
@@ -101,18 +109,13 @@ background-position: center top; background-image: url('/assets/jonkershoek-moun
                 </li>
                 <li>
                     <a href="/docs/Sonbesie%20metadata.pdf">
-                        Stellenbsoch University - weather station setup
+                        Stellenbosch University weather station setup (legacy)
                     </a>
                 </li>
                 <li>
                     <a target="_blank"
                        href="https://maps.google.com/maps/ms?ie=UTF8&t=h&hl=en&msa=0&msid=105004959243337608908.00046bb532f92631515af&ll=-33.928415,18.865607&spn=0.002884,0.004796&z=18">
-                        Location of weather stations and webcam on Google Maps
-                    </a>
-                </li>
-                <li>
-                    <a href="https://www.jpmeijers.com/" target="_blank">
-                        About the author
+                        Location of weather stations and webcam on Google Maps (outdated)
                     </a>
                 </li>
             </ul>
@@ -120,21 +123,58 @@ background-position: center top; background-image: url('/assets/jonkershoek-moun
         </div>
     </div>
 
-    <div class="row mt-5 mb-5">
+    <div class="row mt-4 mb-4">
+        <div class="col">
+            <h2>Interesting facts</h2>
+            <ul>
+                <li>The first iteration of this website was created in 2008 when
+                    <a href="https://www.jpmeijers.com/" target="_blank">the author</a>
+                    was a first-year student in Electronic Engineering
+                    at the Stellenbosch University.
+                </li>
+                <li>The website is hosted by the Stellenbosch University on a server running the
+                    <a href="https://en.wikipedia.org/wiki/LAMP_(software_bundle)">LAMP stack</a>.
+                    The current components are:
+                    <ul>
+                        <li>Red Hat Enterprise Linux Server release 7.9 (Maipo)</li>
+                        <li>Apache 2.4.34</li>
+                        <li>MariaDB 5.5.68</li>
+                        <li>PHP 5.4.16</li>
+                    </ul>
+                    There is a project underway to migrate to a newer server with:
+                    <ul>
+                        <li>Red Hat Enterprise Linux release 8.10 (Ootpa)</li>
+                        <li>Apache 2.4.37</li>
+                        <li>MariaDB 10.3.39</li>
+                        <li>PHP 7.3.20</li>
+                    </ul>
+                </li>
+                <li>
+                    The software behind this website is open source and available on
+                    <a href="https://github.com/stellenbosch-weather">
+                        Github
+                    </a>. Please feel free to contribute.
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="row mt-4 mb-4">
         <div class="col">
             <h2>Contact</h2>
 
-            This website runs on a <strong>best-effort basis</strong>.
+            This website is operated on a <strong>best-effort basis</strong>.
             Its uptime is not constantly monitored.
             In case of an outage, please check back later.
             If the issue persists, please contact us below.
+            We are not able to provide support regarding the data obtained from this site.
 
             <!-- modify this form HTML and place wherever you want your form -->
             <form
-                action="https://formspree.io/f/xbdrwraa"
-                method="POST"
-                class="mt-4"
-                id="contactForm"
+                    action="https://formspree.io/f/xbdrwraa"
+                    method="POST"
+                    class="mt-4"
+                    id="contactForm"
             >
                 <div class="mb-3">
                     <label for="email" class="form-label">Email address</label>
