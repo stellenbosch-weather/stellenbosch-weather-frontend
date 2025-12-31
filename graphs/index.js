@@ -2,22 +2,67 @@ const apiBaseUrl = 'http://weather.sun.ac.za/api/';
 let historyChart = null;
 let originalData = [];
 
+function changeDate(days) {
+    const dateInput = document.getElementById('historyDate');
+    const currentDate = moment(dateInput.value);
+    const newDate = currentDate.add(days, 'days');
+    
+    // Respect the limits
+    const minDate = moment('2010-05-24');
+    const today = moment();
+    
+    if (newDate.isBefore(minDate, 'day') || newDate.isAfter(today, 'day')) return;
+
+    dateInput.value = newDate.format('YYYY-MM-DD');
+    fetchHistory();
+}
+
 async function fetchHistory() {
     try {
-        const response = await fetch(apiBaseUrl + 'history/');
+        const dateInput = document.getElementById('historyDate');
+        let selectedDate = dateInput.value ? moment(dateInput.value) : moment();
+
+        const minDate = moment('2010-05-24');
+
+        // Don't allow fetching for future dates
+        if (selectedDate.isAfter(moment(), 'day')) {
+            selectedDate = moment();
+            dateInput.value = selectedDate.format('YYYY-MM-DD');
+        } else if (selectedDate.isBefore(minDate, 'day')) {
+            selectedDate = minDate;
+            dateInput.value = selectedDate.format('YYYY-MM-DD');
+        }
+        
+        // Calculate start of selected day (00:00) and start of next day (00:00)
+        const start = selectedDate.clone().startOf('day').unix();
+        const end = selectedDate.clone().add(1, 'days').startOf('day').unix();
+
+        const response = await fetch(`${apiBaseUrl}history/?start=${start}&end=${end}`);
         const data = await response.json();
 
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
+            // Save current checkbox states before clearing
+            const activeCheckboxes = Array.from(document.querySelectorAll('#historyControls input[type="checkbox"]:checked'))
+                .map(cb => cb.id.replace('check_', ''));
+
             originalData = data;
-            setupHistoryControls(data);
-            createHistoryChart();
+            if (data.length > 0) {
+                setupHistoryControls(data, activeCheckboxes);
+            }
+            
+            if (!historyChart) {
+                createHistoryChart(selectedDate);
+            } else {
+                updateChartAxis(selectedDate);
+                updateChartDatasets();
+            }
         }
     } catch (error) {
         console.error('Error fetching history:', error);
     }
 }
 
-function setupHistoryControls(data) {
+function setupHistoryControls(data, activeKeys = []) {
     const controls = document.getElementById('historyControls');
     if (!controls) return;
 
@@ -31,12 +76,19 @@ function setupHistoryControls(data) {
     keys.forEach(key => {
         const wrapper = document.createElement('div');
         wrapper.className = 'form-check';
-        
+    
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.className = 'form-check-input';
         checkbox.id = `check_${key}`;
-        checkbox.checked = (key === 'AirTC_Avg'); // Temperature default
+        
+        // Restore previous selection or use default if it's the first load
+        if (activeKeys.length > 0) {
+            checkbox.checked = activeKeys.includes(key);
+        } else {
+            checkbox.checked = (key === 'AirTC_Avg'); // Temperature default
+        }
+        
         checkbox.onchange = () => updateChartDatasets();
 
         const label = document.createElement('label');
@@ -50,7 +102,7 @@ function setupHistoryControls(data) {
     });
 }
 
-function createHistoryChart() {
+function createHistoryChart(selectedDate) {
     const ctx = document.getElementById('historyChart').getContext('2d');
     
     historyChart = new Chart(ctx, {
@@ -68,6 +120,8 @@ function createHistoryChart() {
             scales: {
                 x: {
                     type: 'time',
+                    min: selectedDate.clone().startOf('day').toDate(),
+                    max: selectedDate.clone().add(1, 'days').startOf('day').toDate(),
                     time: {
                         unit: 'hour',
                         displayFormats: { hour: 'HH:mm' }
@@ -85,6 +139,12 @@ function createHistoryChart() {
     });
 
     updateChartDatasets();
+}
+
+function updateChartAxis(selectedDate) {
+    if (!historyChart) return;
+    historyChart.options.scales.x.min = selectedDate.clone().startOf('day').toDate();
+    historyChart.options.scales.x.max = selectedDate.clone().add(1, 'days').startOf('day').toDate();
 }
 
 function updateChartDatasets() {
@@ -121,4 +181,14 @@ function updateChartDatasets() {
     historyChart.update();
 }
 
-window.onload = fetchHistory;
+window.onload = () => {
+    const dateInput = document.getElementById('historyDate');
+    if (dateInput) {
+        const today = moment().format('YYYY-MM-DD');
+        dateInput.value = today;
+        dateInput.max = today;
+        dateInput.min = '2010-05-24';
+        dateInput.onchange = fetchHistory;
+    }
+    fetchHistory();
+};

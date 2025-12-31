@@ -76,12 +76,25 @@ background-position: center top; background-image: url('/assets/jonkershoek-moun
 <div class="container-fluid" id="downloadContainer">
     <div class="row">
         <div class="col">
-            <div id="historyControls" class="mb-3 d-flex flex-wrap gap-3 p-3 bg-light border rounded">
+            <div class="mb-3 p-3 bg-light border rounded">
+                <div class="row align-items-center g-3">
+                    <div class="col-auto">
+                        <label for="historyDate" class="form-label mb-0">Select Date:</label>
+                    </div>
+                    <div class="col-auto d-flex gap-2">
+                        <button class="btn btn-outline-secondary" onclick="changeDate(-1)">&lt;&lt;</button>
+                        <input type="date" id="historyDate" class="form-control" min="2010-05-24">
+                        <button class="btn btn-outline-secondary" onclick="changeDate(1)">&gt;&gt;</button>
+                    </div>
+                </div>
+                <hr>
+                <div id="historyControls" class="d-flex flex-wrap gap-3">
                     <!-- Checkboxes will be generated here -->
                 </div>
-                <div style="height: 500px; position: relative;">
-                    <canvas id="historyChart"></canvas>
-                </div>
+            </div>
+            <div style="height: 500px; position: relative;">
+                <canvas id="historyChart"></canvas>
+            </div>
         </div>
     </div>
 </div>
