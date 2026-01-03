@@ -62,6 +62,23 @@ async function fetchHistory() {
     }
 }
 
+const fieldDescriptions = {
+    'TrackerWM_Avg': 'Direct Normal Irradiance(DNI)',
+    'Tracker2WM_Avg': 'Direct Normal Irradiance(DNI) (not installed anymore)',
+    'ShadowWM_Avg': 'Diffuse Horizontal Irradiance (DHI)',
+    'SunWM_Avg': 'Global Horizontal Irradiance (GHI)',
+    'ShadowbandWM_Avg': 'Diffuse Horizontal Irradiance (DHI) Shadow Band',
+    'DNICalc_Avg': 'Calculated Direct Normal Irradiance(DNI)',
+    'AirTC_Avg': 'Temperature',
+    'RH': 'Relative Humidity',
+    'WS_ms_S_WVT': 'Wind Speed',
+    'WindDir_D1_WVT': 'Wind Direction',
+    'WindDir_SD1_WVT': 'Wind direction standard deviation',
+    'BP_mB_Avg': 'Barometric pressure',
+    'UVA_Avg': 'Average UV A',
+    'UVB_Avg': 'Average UV B'
+};
+
 function setupHistoryControls(data, activeKeys = []) {
     const controls = document.getElementById('historyControls');
     if (!controls) return;
@@ -75,7 +92,8 @@ function setupHistoryControls(data, activeKeys = []) {
 
     keys.forEach(key => {
         const wrapper = document.createElement('div');
-        wrapper.className = 'form-check';
+        wrapper.className = 'form-check mb-2';
+        wrapper.style.breakInside = 'avoid';
     
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
@@ -92,12 +110,17 @@ function setupHistoryControls(data, activeKeys = []) {
         checkbox.onchange = () => updateChartDatasets();
 
         const label = document.createElement('label');
-        label.className = 'form-check-label';
+        label.className = 'form-check-label fw-bold';
         label.htmlFor = `check_${key}`;
-        label.textContent = key.replace(/_/g, ' ');
+        label.textContent = key;
+
+        const description = document.createElement('div');
+        description.className = 'text-muted small';
+        description.textContent = fieldDescriptions[key] || '';
 
         wrapper.appendChild(checkbox);
         wrapper.appendChild(label);
+        wrapper.appendChild(description);
         controls.appendChild(wrapper);
     });
 }
