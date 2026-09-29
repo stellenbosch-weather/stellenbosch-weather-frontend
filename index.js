@@ -2,7 +2,8 @@
 /* global jQuery */
 /* global timeago */
 
-const apiBaseUrl = 'http://weather.sun.ac.za/api/';
+const apiBaseUrl = '/api/';
+const weatherStationOfflineThresholdMs = 60 * 60 * 1000;
 
 const imageModal = document.getElementById('imageModal');
 const chartModal = new bootstrap.Modal(document.getElementById('chartModal'));
@@ -66,6 +67,13 @@ async function refreshCurrentWeather() {
         } else {
             updateCurrent(data);
             updateTemperature(data);
+
+            if (isWeatherStationOffline(data["TimeStamp"])) {
+                setAlertMessage(
+                    'Weather station is offline. The latest measurement is more than one hour old.',
+                    'warning'
+                );
+            }
         }
 
     } catch (error) {
@@ -304,6 +312,13 @@ function setAlertMessage(message, type) {
 function clearCurrent() {
     cardCurrentBody.innerHTML = "<span class='text-muted'>---</span>";
     $("time#currentUpdated").timeago("update", null);
+}
+
+function isWeatherStationOffline(timestamp, now = moment()) {
+    const measurementTime = moment(timestamp, "YYYY-MM-DD HH:mm:ss", true);
+
+    return measurementTime.isValid() &&
+        now.diff(measurementTime) > weatherStationOfflineThresholdMs;
 }
 
 function updateCurrent(data) {
