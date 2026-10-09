@@ -343,10 +343,15 @@ function updateCurrent(data) {
         else if (windSpeedNum >= 1.6) windString = windString + ", light breeze";
         else if (windSpeedNum >= 0.5) windString = windString + ", light air";
 
+        const rainToday = data['rain_today'];
+        const rainString = rainToday !== null && rainToday !== undefined && isNumeric(rainToday)
+            ? `${Number(rainToday).toFixed(1)} mm`
+            : '<span class="text-muted">unavailable</span>';
+
         cardCurrentBody.innerHTML = [
             `<div class="fw-bold">${momentObject.format("dddd, D MMMM YYYY, H:mm")}</div>`,
             `<div><span class="fw-bold">Wind:</span> ${windString}</div>`,
-            `<div><span class="fw-bold">Rain:</span> <span class="text-muted">unavailable</span></div>`,
+            `<div><span class="fw-bold">Rain today:</span> ${rainString}</div>`,
             `<div><span class="fw-bold">Humidity:</span> ${data["RH"]}%</div>`,
             `<div><span class="fw-bold">Barometer:</span> ${data["BP_mB_Avg"]}hPa</div>`,
         ].join('')
