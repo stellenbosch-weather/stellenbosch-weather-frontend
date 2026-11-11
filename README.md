@@ -26,4 +26,4 @@ Run `python3 -m unittest discover -s services/sonbesie/tests -q` for the collect
 
 Keep logs outside Git and configure retention with the server's available logrotate or a reviewed cron cleanup. Review files in `/home/weather/var/log` before deleting old output. The two rain migrations in `migrations/` are not repeatable; inspect the database columns before applying either, and do not run migrations during the repository cutover.
 
-See `deploy/import-history.md` for source revisions and `RESTRUCTURING_PLAN.md` in the parent workspace for the full migration plan and server diagnostic commands.
+See `deploy/import-history.md` for source revisions for source revisions and the import method.
