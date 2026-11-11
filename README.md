@@ -8,7 +8,7 @@ One checkout contains the public website and PHP API, scheduled weather collecto
 
 For local development, copy `settings.conf.template` to `settings.conf`, fill in the existing database and Sonbesie settings, and set `[paths] data_dumps` to the historical ZIP directory. Create `var/log`, `var/cache`, `var/run`, and `var/tmp` with permissions appropriate for the local PHP and collector users. Do not put credentials in `public/` or Git.
 
-Scheduled HTML collectors use Python 2.7 or Python 3 with a working MySQLdb driver. The wrappers use `${WEATHER_PYTHON:-python}`. The production value must be set to the verified interpreter in the crontab or environment. The PakBus and SAURAN utilities have separate optional dependencies and are not needed for the scheduled HTML collectors. The older `*Dat.py` utilities retain historical absolute input paths and are manual, unsupported tools, not part of the scheduled deployment.
+Scheduled HTML collectors use Python 2.7 or Python 3 with a working MySQLdb driver. The wrappers use `${WEATHER_PYTHON:-python}`. The verified production interpreter is `/usr/bin/python` (Python 2.7.5 with MySQLdb), as shown in `deploy/crontab.example`. The PakBus and SAURAN utilities have separate optional dependencies and are not needed for the scheduled HTML collectors. The older `*Dat.py` utilities retain historical absolute input paths and are manual, unsupported tools, not part of the scheduled deployment.
 
 ## Deployment
 
@@ -27,3 +27,5 @@ Run `python3 -m unittest discover -s services/sonbesie/tests -q` for the collect
 Keep logs outside Git and configure retention with the server's available logrotate or a reviewed cron cleanup. Review files in `/home/weather/var/log` before deleting old output. The two rain migrations in `migrations/` are not repeatable; inspect the database columns before applying either, and do not run migrations during the repository cutover.
 
 See `deploy/import-history.md` for source revisions for source revisions and the import method.
+
+The observed server baseline is RHEL 7.9, Apache 2.4.34, PHP 5.4.16 CLI, Python 2.7.5, and Git 1.8.3.1. Web PHP settings and file access remain to be checked.

@@ -1,4 +1,5 @@
 # Replace only the three existing weather import entries. Verify server timezone.
+WEATHER_PYTHON=/usr/bin/python
 * * * * * /home/weather/weather-site/services/import-minutely.sh >> /home/weather/var/log/cron-minutely.log 2>&1
 2 * * * * /home/weather/weather-site/services/import-hourly.sh >> /home/weather/var/log/cron-hourly.log 2>&1
 2 0 * * * /home/weather/weather-site/services/import-daily.sh >> /home/weather/var/log/cron-daily.log 2>&1
