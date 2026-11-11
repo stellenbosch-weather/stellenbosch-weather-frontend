@@ -3,3 +3,6 @@ WEATHER_PYTHON=/usr/bin/python
 * * * * * /home/weather/weather-site/services/import-minutely.sh >> /home/weather/var/log/cron-minutely.log 2>&1
 2 * * * * /home/weather/weather-site/services/import-hourly.sh >> /home/weather/var/log/cron-hourly.log 2>&1
 2 0 * * * /home/weather/weather-site/services/import-daily.sh >> /home/weather/var/log/cron-daily.log 2>&1
+
+# Rotate application and cron logs daily using a private state file.
+5 1 * * * /usr/sbin/logrotate -s /home/weather/var/run/logrotate.status /home/weather/weather-site/deploy/logrotate.conf >> /home/weather/var/log/logrotate.log 2>&1

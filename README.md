@@ -24,7 +24,7 @@ For later updates, pause collectors, check out one tested tag, account for opcod
 
 Run `python3 -m unittest discover -s services/sonbesie/tests -q` for the collector regression suite. Run `php -l` on PHP files using the confirmed server-compatible PHP version. Verify `bin/xplanet --version` on the server and test execution through PHP. Confirm a plain clone has no Git submodules or gitlinks. Check `git status --short` after normal operation; it should be clean.
 
-Keep logs outside Git and configure retention with the server's available logrotate or a reviewed cron cleanup. Review files in `/home/weather/var/log` before deleting old output. The two rain migrations in `migrations/` are not repeatable; inspect the database columns before applying either, and do not run migrations during the repository cutover.
+Keep logs outside Git. `deploy/logrotate.conf` rotates `/home/weather/var/log/*.log` daily, retains 14 compressed copies, and uses `copytruncate` for cron redirection. The example crontab runs `/usr/sbin/logrotate` as `weather` with state in `/home/weather/var/run/logrotate.status`. Review old files in `/home/weather/services` separately before deleting or archiving them. The two rain migrations in `migrations/` are not repeatable; inspect the database columns before applying either, and do not run migrations during the repository cutover.
 
 See `deploy/import-history.md` for source revisions and the import method.
 
