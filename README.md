@@ -1,6 +1,6 @@
 # Stellenbosch Weather
 
-Canonical GitHub repository: `git@github.com:stellenbosch-weather/stellenbosch-weather-frontend.git`. The repository name is historical; this checkout contains the complete frontend, API, and collectors.
+Canonical GitHub repository: `https://github.com/stellenbosch-weather/stellenbosch-weather-frontend.git`. The repository name is historical; this checkout contains the complete frontend, API, and collectors.
 
 One checkout contains the public website and PHP API, scheduled weather collectors, textures, icons, and the xplanet executable. Apache serves only `public/`. The `app/`, `services/`, `resources/`, `bin/`, and `deploy/` directories must remain outside the document root.
 
