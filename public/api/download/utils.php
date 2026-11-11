@@ -140,6 +140,14 @@ function downloadHistory($start, $end) {
 
     set_time_limit(300);
 
+    // Return no content before creating files when this range has no readings.
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($row === false) {
+        $stmt->closeCursor();
+        http_response_code(204);
+        return;
+    }
+
     // Create temporary CSV file
     $csv_filename = 'weather_data_sb_' . $start->getTimestamp() . '_' . $end->getTimestamp() . '.csv';
     $csv_path = runtime_path('tmp') . '/' . $csv_filename;
@@ -147,14 +155,10 @@ function downloadHistory($start, $end) {
     $csv_file = fopen($csv_path, 'w');
 
     // Write CSV header
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($row !== false) {
-        fputcsv($csv_file, array_keys($row));
-
-        do {
-            fputcsv($csv_file, $row);
-        } while (($row = $stmt->fetch(PDO::FETCH_ASSOC)) !== false);
-    }
+    fputcsv($csv_file, array_keys($row));
+    do {
+        fputcsv($csv_file, $row);
+    } while (($row = $stmt->fetch(PDO::FETCH_ASSOC)) !== false);
     $stmt->closeCursor();
 
     fclose($csv_file);

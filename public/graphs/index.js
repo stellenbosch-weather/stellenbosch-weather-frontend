@@ -22,6 +22,12 @@ function changeDate(days) {
     fetchHistory();
 }
 
+function setHistoryMessage(message, type = 'warning') {
+    const alert = document.getElementById('liveAlertPlaceholder');
+    alert.textContent = message;
+    alert.className = message ? `alert alert-${type}` : '';
+}
+
 async function fetchHistory() {
     try {
         const dateInput = document.getElementById('historyDate');
@@ -43,7 +49,9 @@ async function fetchHistory() {
         const end = selectedDate.clone().endOf('day').unix();
 
         const response = await fetch(`${apiBaseUrl}history/?start=${start}&end=${end}`);
+        if (!response.ok) throw new Error('History request failed: ' + response.status);
         const data = await response.json();
+        if (!Array.isArray(data)) throw new Error('Invalid history response');
 
         if (Array.isArray(data)) {
             // Save current checkbox states before clearing
@@ -51,6 +59,9 @@ async function fetchHistory() {
                 .map(cb => cb.id.replace('check_', ''));
 
             originalData = data;
+            setHistoryMessage(data.length === 0
+                ? `No weather data is available for ${selectedDate.format('YYYY-MM-DD')}.`
+                : '');
             if (data.length > 0) {
                 setupHistoryControls(data, activeCheckboxes);
             }
@@ -64,6 +75,9 @@ async function fetchHistory() {
         }
     } catch (error) {
         console.error('Error fetching history:', error);
+        originalData = [];
+        updateChartDatasets();
+        setHistoryMessage('Unable to load weather data. Please try again.', 'danger');
     }
 }
 

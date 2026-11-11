@@ -9,10 +9,11 @@ const moment = require(path.join(root, 'public/libraries/moment.2.30.1.min.js'))
         process.env.TZ = timezone;
         let request;
         const dateInput = { value: '2026-11-10' };
+        const alert = {};
         const ctx = {
             moment, console, window: {},
             document: {
-                getElementById: id => id === 'historyDate' ? dateInput : { getContext: () => ({}) },
+                getElementById: id => id === 'historyDate' ? dateInput : id === 'liveAlertPlaceholder' ? alert : { getContext: () => ({}) },
                 querySelectorAll: () => []
             },
             fetch: async url => { request = url; return { ok: true, json: async () => [] }; },
@@ -24,6 +25,7 @@ const moment = require(path.join(root, 'public/libraries/moment.2.30.1.min.js'))
         const url = new URL(request, 'https://weather.sun.ac.za');
         assert.equal(url.searchParams.get('start'), '1794261600', timezone);
         assert.equal(url.searchParams.get('end'), '1794347999', timezone);
+        assert.match(alert.textContent, /No weather data is available for 2026-11-10/);
         ctx.document.querySelectorAll = () => [{ checked: true, id: 'check_AirTC_Avg' }];
         vm.runInContext("originalData = [{TimeStamp:'2026-11-10 00:00:00', AirTC_Avg:20}]; updateChartDatasets()", ctx);
         assert.equal(vm.runInContext('historyChart.data.datasets[0].data[0].x.getTime()', ctx), 1794261600000);
