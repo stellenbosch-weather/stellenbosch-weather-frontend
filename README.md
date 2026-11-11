@@ -28,4 +28,4 @@ Keep logs outside Git and configure retention with the server's available logrot
 
 See `deploy/import-history.md` for source revisions and the import method.
 
-The observed server baseline is RHEL 7.9, Apache 2.4.34, PHP 5.4.16 CLI, Python 2.7.5, and Git 1.8.3.1. Web PHP settings and file access remain to be checked.
+The observed server baseline is RHEL 7.9, Apache 2.4.34, PHP 5.4.16 CLI, PHP 7.3.33 FPM under `weather`, Python 2.7.5, and Git 1.8.3.1. Web PHP can read the existing private configuration and dumps and execute the current xplanet binary; symlink serving and the new checkout context remain to be checked.
