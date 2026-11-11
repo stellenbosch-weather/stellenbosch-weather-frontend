@@ -1,1 +1,8 @@
-/.idea
+/.idea/
+/settings.conf
+/var
+*.pyc
+__pycache__/
+*.log
+*.lock
+*.pid
