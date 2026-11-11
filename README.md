@@ -26,6 +26,6 @@ Run `python3 -m unittest discover -s services/sonbesie/tests -q` for the collect
 
 Keep logs outside Git and configure retention with the server's available logrotate or a reviewed cron cleanup. Review files in `/home/weather/var/log` before deleting old output. The two rain migrations in `migrations/` are not repeatable; inspect the database columns before applying either, and do not run migrations during the repository cutover.
 
-See `deploy/import-history.md` for source revisions for source revisions and the import method.
+See `deploy/import-history.md` for source revisions and the import method.
 
 The observed server baseline is RHEL 7.9, Apache 2.4.34, PHP 5.4.16 CLI, Python 2.7.5, and Git 1.8.3.1. Web PHP settings and file access remain to be checked.
