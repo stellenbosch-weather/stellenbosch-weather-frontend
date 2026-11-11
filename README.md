@@ -1,5 +1,7 @@
 # Stellenbosch Weather
 
+Canonical GitHub repository: `git@github.com:stellenbosch-weather/stellenbosch-weather-frontend.git`. The repository name is historical; this checkout contains the complete frontend, API, and collectors.
+
 One checkout contains the public website and PHP API, scheduled weather collectors, textures, icons, and the xplanet executable. Apache serves only `public/`. The `app/`, `services/`, `resources/`, `bin/`, and `deploy/` directories must remain outside the document root.
 
 ## Layout and local setup
@@ -12,7 +14,7 @@ Scheduled HTML collectors use Python 2.7 or Python 3 with a working MySQLdb driv
 
 ## Deployment
 
-The intended checkout is `/home/weather/weather-site`. Keep the existing private `/home/weather/settings.conf` and `/home/weather/data-dumps`. Create `/home/weather/var/{log,cache,run,tmp}`. Link `weather-site/settings.conf` to `../settings.conf` and `weather-site/var` to `../var`. Configure Apache's served path as `/home/weather/public_html`, linked to `weather-site/public`, only after confirming symlink handling, `open_basedir`, and access under the web PHP user. Do not guess ownership or use world-writable permissions.
+The intended checkout is `/home/weather/weather-site`. If it was initially cloned from a local Git bundle, replace that temporary `origin` with the canonical GitHub remote using `git remote set-url origin git@github.com:stellenbosch-weather/stellenbosch-weather-frontend.git`, then `git fetch origin`. Keep the existing private `/home/weather/settings.conf` and `/home/weather/data-dumps`. Create `/home/weather/var/{log,cache,run,tmp}`. Link `weather-site/settings.conf` to `../settings.conf` and `weather-site/var` to `../var`. Configure Apache's served path as `/home/weather/public_html`, linked to `weather-site/public`, only after confirming symlink handling, `open_basedir`, and access under the web PHP user. Do not guess ownership or use world-writable permissions.
 
 Use `deploy/crontab.example` to replace only the three weather import entries, retaining unrelated jobs. Set `WEATHER_PYTHON` to the verified interpreter, for example by adding an assignment at the top of the user's crontab. Confirm the server's cron timezone keeps the intended Africa/Johannesburg schedule.
 
