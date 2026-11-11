@@ -1,3 +1,6 @@
-[submodule "public_html/sources/metno-weather-icons"]
-	path = public_html/sources/metno-weather-icons
+[submodule "assets/weathericons"]
+	path = assets/weathericons
 	url = https://github.com/metno/weathericons.git
+[submodule "api"]
+	path = api
+	url = https://github.com/stellenbosch-weather/stellenbosch-weather-api.git

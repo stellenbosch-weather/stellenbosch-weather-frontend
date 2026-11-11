@@ -1,3 +1,0 @@
-#RewriteEngine On
-#RewriteCond %{HTTP_HOST} ^.*~weather$
-#RewriteRule ^.*~weather(/)?$ weather.sun.ac.za [L]

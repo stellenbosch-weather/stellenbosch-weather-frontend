@@ -1,6 +1,1 @@
-settings.conf
-public_html/graphs/*/*.png
-public_html/graphs/*/*.rrd
-*.idea/
-generateRRDs/*-lock
-generateRRDs/*-log
+/.idea

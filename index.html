@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4DYH19E386"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-4DYH19E386');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+    <title>Stellenbosch Weather</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+</head>
+<body>
+<div class="row m-0" style="height: 120px;
+background-position: center top; background-image: url('/assets/jonkershoek-mountains.jpg'); background-size: cover;">
+    <div class="col min-vh-10 d-flex flex-column justify-content-center align-items-center">
+        <h1 style="color: #F0F8FF;" class="mb-0">Stellenbosch Weather</h1>
+    </div>
+</div>
+
+<nav class="navbar navbar-expand-sm bg-body-tertiary">
+    <div class="container-fluid">
+        <!--        <a class="navbar-brand" href="#">Stellenbosch Weather</a>-->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/forecasts/">Forecasts</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/graphs/">Graphs</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/download/">Download</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" target="_blank"
+                       href="http://www.weather.lcao.co.za/index.php/Special_WeatherStatsRainfall">Rainfall</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/about/">About</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        Location: 33&deg;55'42&quot; S, 18&deg;51'55&quot; E, Elevation: 119m
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div id="liveAlertPlaceholder"></div>
+<!--<div class="alert alert-danger alert-dismissible fade show" role="alert">-->
+<!--    An error occurred.-->
+<!--    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>-->
+<!--</div>-->
+
+<div class="container-fluid">
+    <div class="row mt-1 row-cols-1 row-cols-md-3 g-4">
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header h5">
+                    Current Conditions
+                </div>
+                <div class="card-body" id="cardCurrentBody">
+                    <div class="text-muted">unavailable</div>
+                </div>
+                <div class="card-footer">
+                    <small class="text-body-secondary">
+                        Data refreshed
+                        <time class="timeago" datetime="null" id="currentUpdated">---</time>
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header h5">
+                    Outdoor Temperature
+                </div>
+                <div class="card-body text-center d-flex flex-column justify-content-center"
+                     id="cardTemperatureBody" style="cursor: pointer;">
+                    <div class="display-1" id="outdoorTemperature">
+                        <span class="text-muted">---</span>
+                    </div>
+                </div>
+                <div class="card-footer text-center" id="outdoorTemperatureFooter">
+                    <div class="text-muted">Min: --&deg;C @ --:--</div>
+                    <div class="text-muted">Max: --&deg;C @ --:--</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header h5">
+                    Forecast
+                </div>
+                <div class="card-body" id="cardForecastBody">
+                    <div class="text-muted">---</div>
+                </div>
+                <div class="card-footer">
+                    <small class="text-body-secondary">
+                        Forecast updated
+                        <time class="timeago" datetime="null" id="forecastUpdated">---</time>
+                        from <a href="https://www.met.no/">met.no</a>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-1 g-4">
+        <div class="col col-sm-5">
+            <div class="card h-100">
+                <div class="card-header h5">
+                    Sun and clouds
+                </div>
+                <div class="card-body pt-0 pb-0">
+                    <div class="row pt-1 pb-1">
+                        <div class="col" id="sunStats">
+                            <div class="text-muted">---</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col d-flex justify-content-center align-items-center"
+                             style="background-color: black;" id="earthImageContainer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col col-sm-5">
+            <div class="card h-100">
+                <div class="card-header h5">
+                    Moon
+                </div>
+                <div class="card-body pb-0 pt-0">
+
+                    <div class="row pt-1 pb-1">
+
+                        <div class="col" id="moonStats">
+                            <div class="text-muted">---</div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col d-flex justify-content-center align-items-center"
+                             style="background-color: black;" id="moonImageContainer">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col col-sm-2">
+            <div class="card h-100">
+                <div class="card-header h5">
+                    Stars
+                </div>
+                <div class="card-body d-flex justify-content-center align-items-center m-0 p-0"
+                     style="background-color: black;" id="cardStarsBody">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-1 g-4">
+        <div class="col col-sm-6">
+            <div class="card h-100">
+                <div class="card-body d-flex justify-content-center align-items-center">
+                    <a href="https://www.sun.ac.za/" target="_blank">
+                        <img src="assets/SUN_logo.png" alt="Stellenbosch University"
+                             class="mx-auto d-block"
+                             style="max-width: 150px">
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col col-sm-6">
+            <div class="card h-100">
+                <div class="card-body d-flex justify-content-center align-items-center">
+                    <a href="https://www.eng.sun.ac.za/" target="_blank">
+                        <img src="assets/Faculty-of-Engineering-Stellenbosch-University-Logo.png"
+                             alt="Engineering Faculty"
+                             class="mx-auto d-block"
+                             style="max-width: 150px">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="mt-1 small text-muted">
+                <a href="https://www.jpmeijers.com/" target="_blank"
+                   style="text-decoration: none; color: inherit;">
+                    &copy; 2026. A JPMeijers.com creation.
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col text-center">
+            <a href="https://www.quotationspage.com/quote/38042.html" target="_blank"
+               style="text-decoration: none; color: inherit;">
+                <i>"The trouble with weather forecasting is that it's right too often for us to ignore it and wrong too
+                    often for us to rely on it."</i> - Patrick Young
+            </a>
+        </div>
+    </div>
+
+
+    <!-- Modal popup definition -->
+    <div class="modal fade" id="chartModal" tabindex="-1" aria-labelledby="chartModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="chartModalLabel">Temperature History (Past 24h)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <canvas id="tempChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModalLabel">Enlarged Image</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- The full resolution image will be loaded here -->
+                    <img src="" class="img-fluid" id="modalImage" alt="Enlarged image">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous"></script>
+
+<script src="/libraries/moment.2.30.1.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="/libraries/jquery.timeago.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+
+<script src="/libraries/suncalc.min.js"></script>
+
+<script src="index.js"></script>
+</body>
+</html>
