@@ -67,13 +67,21 @@ async function downloadFile(station) {
 async function downloadHistory() {
     alertPlaceholder.innerHTML = '';
 
+    const startInput = document.getElementById('startDate');
+    const endInput = document.getElementById('endDate');
+    if (!startInput.reportValidity() || !endInput.reportValidity()) return;
+    const startDate = startInput.value;
+    const endDate = endInput.value;
+    if (startDate > endDate) {
+        alertPlaceholder.innerHTML = '<div class="alert alert-danger" role="alert">Start date must be on or before end date.</div>';
+        return;
+    }
+
     const spinner = document.getElementById('downloadHistorySpinner');
     spinner.classList.remove('d-none');
     const spinnerText = document.getElementById('downloadHistoryText');
     spinnerText.classList.remove('d-none');
 
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
 
     const startTimestamp = new Date(startDate + 'T00:00:00+02:00').getTime();
     const endTimestamp = new Date(endDate + 'T23:59:59+02:00').getTime();

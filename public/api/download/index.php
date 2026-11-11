@@ -46,9 +46,19 @@ if (isset($json_data['file'])) {
     downloadFile($file);
 }
 else if (isset($json_data['start']) && isset($json_data['end'])) {
+    $startTimestamp = filter_var($json_data['start'], FILTER_VALIDATE_INT);
+    $endTimestamp = filter_var($json_data['end'], FILTER_VALIDATE_INT);
+    if ($startTimestamp === false || $endTimestamp === false) {
+        http_response_code(400);
+        die('Invalid timestamp values provided.');
+    }
+    if ($startTimestamp > $endTimestamp) {
+        http_response_code(400);
+        die('Start date must be on or before end date.');
+    }
     try {
-        $start = (new DateTime())->setTimestamp(intval($json_data['start']));
-        $end = (new DateTime())->setTimestamp(intval($json_data['end']));
+        $start = (new DateTime())->setTimestamp($startTimestamp);
+        $end = (new DateTime())->setTimestamp($endTimestamp);
     } catch (Exception $e) {
         http_response_code(400);
         die('Invalid timestamp values provided.');
