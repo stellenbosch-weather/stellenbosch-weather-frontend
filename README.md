@@ -31,3 +31,51 @@ Keep logs outside Git. `deploy/logrotate.conf` rotates `/home/weather/var/log/*.
 See `deploy/import-history.md` for the history graph, source revisions, and the redacted older-site import.
 
 The observed server baseline is RHEL 7.9, Apache 2.4.34, PHP 5.4.16 CLI, PHP 7.3.33 FPM under `weather`, Python 2.7.5, and Git 1.8.3.1. Web PHP can read the existing private configuration and dumps and execute the current xplanet binary; symlink serving and the new checkout context remain to be checked.
+
+## Local download debugging
+
+The November 2026 investigation uses an isolated Docker container named
+`stellenbosch-weather-dev-db`, MariaDB 10.11, published only at
+`127.0.0.1:13316`. Production runs MariaDB 10.5.22. The local database and user
+are `weather_dev`; the development-only password is `local-weather-only`.
+`settings.conf` contains only these local credentials. Start the existing
+container with `docker start stellenbosch-weather-dev-db`; stop it with
+`docker stop stellenbosch-weather-dev-db`. No collectors are scheduled locally.
+
+Ignored `var/dev/schema.sql` contains the production definitions of `SB_TMin`
+and `weatheDataDownload`. `var/dev/weather-data.sql` contains 105,893 public
+weather readings, exported without table locks for August 1–November 11, 2026.
+The actual sample starts August 19 at 02:00 and ends November 11 at 15:51 SAST.
+The MyISAM source is live, so this is a debugging sample, not a transactional
+backup. No production download-log rows or credentials were copied.
+
+To create a fresh local container and import the saved sample, from this checkout:
+
+```sh
+docker run -d --name stellenbosch-weather-dev-db -p 127.0.0.1:13316:3306 -e MARIADB_RANDOM_ROOT_PASSWORD=yes -e MARIADB_DATABASE=weather_dev -e MARIADB_USER=weather_dev -e MARIADB_PASSWORD=local-weather-only mariadb:10.11
+docker exec -i stellenbosch-weather-dev-db mariadb -uweather_dev -plocal-weather-only weather_dev < var/dev/schema.sql
+docker exec -i stellenbosch-weather-dev-db mariadb -uweather_dev -plocal-weather-only weather_dev < var/dev/weather-data.sql
+php -S 127.0.0.1:8082 -t public
+```
+
+The local server uses installed PHP 8.3 with `pdo_mysql` and `zip`. Historical
+archive ZIPs were not installed in `data_dumps`; the sample supports database
+features and recent-data downloads. Forecasts still use the external service.
+
+Reproduce the production PHP 7.3 query memory failure, then compare streaming:
+
+```sh
+docker build -t stellenbosch-weather-debug-php73 -f deploy/dev/Dockerfile.php73 deploy/dev
+docker run --rm --network host -v "$PWD:/app:ro" -w /app stellenbosch-weather-debug-php73 php -d memory_limit=256M deploy/dev/probe-download.php
+docker run --rm --network host -v "$PWD:/app:ro" -w /app stellenbosch-weather-debug-php73 php -d memory_limit=256M deploy/dev/probe-download.php --stream
+php -d memory_limit=128M deploy/dev/export-download.php > var/dev/manual-export.zip
+```
+
+The buffered PHP 7.3 query exhausts 256 MiB; streaming returns all 90,541
+August–October readings at 2 MiB peak allocation. PHP 8.3's original complete
+export succeeds at about 146 MiB, so PHP 8 alone hides this failure. The corrected
+PHP 8.3 complete ZIP also uses 2 MiB and its CSV is byte-for-byte identical to
+the original successful export. The PHP 7.3 image tests the database query only;
+it does not include ZIP support. Production code hashes matched the checkout
+before the local fix. The production FPM error log requires administrator access;
+it was not readable by the weather SSH user.

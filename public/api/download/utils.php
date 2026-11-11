@@ -121,6 +121,8 @@ function downloadHistory($start, $end) {
 
     $db = new DatabaseConnector();
     $conn = $db->getConnection();
+    // Stream rows from MySQL instead of buffering the complete export in memory.
+    $conn->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
 
     $sql = "SELECT * FROM SB_TMin WHERE TimeStamp BETWEEN :start AND :end ORDER BY TimeStamp";
     $stmt = $conn->prepare($sql);
@@ -137,8 +139,6 @@ function downloadHistory($start, $end) {
     $stmt->execute();
 
     set_time_limit(300);
-    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    set_time_limit(10);
 
     // Create temporary CSV file
     $csv_filename = 'weather_data_sb_' . $start->getTimestamp() . '_' . $end->getTimestamp() . '.csv';
@@ -147,14 +147,15 @@ function downloadHistory($start, $end) {
     $csv_file = fopen($csv_path, 'w');
 
     // Write CSV header
-    if (!empty($result)) {
-        fputcsv($csv_file, array_keys($result[0]));
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($row !== false) {
+        fputcsv($csv_file, array_keys($row));
 
-        // Write data rows
-        foreach ($result as $row) {
+        do {
             fputcsv($csv_file, $row);
-        }
+        } while (($row = $stmt->fetch(PDO::FETCH_ASSOC)) !== false);
     }
+    $stmt->closeCursor();
 
     fclose($csv_file);
 
