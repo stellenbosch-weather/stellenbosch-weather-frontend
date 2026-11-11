@@ -2,14 +2,19 @@ const apiBaseUrl = '/api/';
 let historyChart = null;
 let originalData = [];
 
+// Station dates and timestamps always use South African Standard Time (UTC+2).
+function stationDay(value = moment().utcOffset(2).format('YYYY-MM-DD')) {
+    return moment.parseZone(value + 'T00:00:00+02:00');
+}
+
 function changeDate(days) {
     const dateInput = document.getElementById('historyDate');
-    const currentDate = moment(dateInput.value);
+    const currentDate = stationDay(dateInput.value);
     const newDate = currentDate.add(days, 'days');
     
     // Respect the limits
-    const minDate = moment('2010-05-24');
-    const today = moment();
+    const minDate = stationDay('2010-05-24');
+    const today = stationDay();
     
     if (newDate.isBefore(minDate, 'day') || newDate.isAfter(today, 'day')) return;
 
@@ -20,22 +25,22 @@ function changeDate(days) {
 async function fetchHistory() {
     try {
         const dateInput = document.getElementById('historyDate');
-        let selectedDate = dateInput.value ? moment(dateInput.value) : moment();
+        let selectedDate = dateInput.value ? stationDay(dateInput.value) : stationDay();
 
-        const minDate = moment('2010-05-24');
+        const minDate = stationDay('2010-05-24');
 
         // Don't allow fetching for future dates
-        if (selectedDate.isAfter(moment(), 'day')) {
-            selectedDate = moment();
+        if (selectedDate.isAfter(stationDay(), 'day')) {
+            selectedDate = stationDay();
             dateInput.value = selectedDate.format('YYYY-MM-DD');
         } else if (selectedDate.isBefore(minDate, 'day')) {
             selectedDate = minDate;
             dateInput.value = selectedDate.format('YYYY-MM-DD');
         }
         
-        // Calculate start of selected day (00:00) and start of next day (00:00)
+        // The history API uses inclusive bounds; exclude the next day.
         const start = selectedDate.clone().startOf('day').unix();
-        const end = selectedDate.clone().add(1, 'days').startOf('day').unix();
+        const end = selectedDate.clone().endOf('day').unix();
 
         const response = await fetch(`${apiBaseUrl}history/?start=${start}&end=${end}`);
         const data = await response.json();
@@ -149,14 +154,22 @@ function createHistoryChart(selectedDate) {
                         unit: 'hour',
                         displayFormats: { hour: 'HH:mm' }
                     },
-                    title: { display: true, text: 'Time' }
+                    ticks: { callback: value => moment(value).utcOffset(2).format('HH:mm') },
+                    title: { display: true, text: 'Time (SAST)' }
                 },
                 y: {
                     title: { display: true, text: 'Value' }
                 }
             },
             plugins: {
-                legend: { position: 'bottom' }
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        title: items => items.length
+                            ? moment(items[0].parsed.x).utcOffset(2).format('YYYY-MM-DD HH:mm [SAST]')
+                            : ''
+                    }
+                }
             }
         }
     });
@@ -188,7 +201,7 @@ function updateChartDatasets() {
             datasets.push({
                 label: key.replace(/_/g, ' '),
                 data: originalData.map(entry => ({
-                    x: moment(entry.TimeStamp).toDate(),
+                    x: moment.parseZone(entry.TimeStamp + '+02:00').toDate(),
                     y: entry[key]
                 })),
                 borderColor: colors[index % colors.length],
@@ -207,7 +220,7 @@ function updateChartDatasets() {
 window.onload = () => {
     const dateInput = document.getElementById('historyDate');
     if (dateInput) {
-        const today = moment().format('YYYY-MM-DD');
+        const today = stationDay().format('YYYY-MM-DD');
         dateInput.value = today;
         dateInput.max = today;
         dateInput.min = '2010-05-24';
