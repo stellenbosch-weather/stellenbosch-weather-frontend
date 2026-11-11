@@ -28,6 +28,6 @@ Run `python3 -m unittest discover -s services/sonbesie/tests -q` for the collect
 
 Keep logs outside Git. `deploy/logrotate.conf` rotates `/home/weather/var/log/*.log` daily, retains 14 compressed copies, and uses `copytruncate` for cron redirection. The example crontab runs `/usr/sbin/logrotate` as `weather` with state in `/home/weather/var/run/logrotate.status`. Review old files in `/home/weather/services` separately before deleting or archiving them. The two rain migrations in `migrations/` are not repeatable; inspect the database columns before applying either, and do not run migrations during the repository cutover.
 
-See `deploy/import-history.md` for source revisions and the import method.
+See `deploy/import-history.md` for the history graph, source revisions, and the redacted older-site import.
 
 The observed server baseline is RHEL 7.9, Apache 2.4.34, PHP 5.4.16 CLI, PHP 7.3.33 FPM under `weather`, Python 2.7.5, and Git 1.8.3.1. Web PHP can read the existing private configuration and dumps and execute the current xplanet binary; symlink serving and the new checkout context remain to be checked.
